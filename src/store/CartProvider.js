@@ -8,9 +8,30 @@ const defaultCartState = {
 
 const cartReducer = (state, action) => {
   if (action.type === 'ADD_ITEM') {
-    const updatedItems = state.items.concat(action.item); // return a new array unlike push method
     const updatedTotalAmount =
       state.totalAmount + action.item.amount * action.item.price;
+
+    // find an item that already exists by comparing to the item that's about to be added
+    const existingCartItemIndex = state.items.findIndex(
+      item => item.id === action.item.id
+    );
+    const existingCartItem = state.items[existingCartItemIndex];
+
+    let updatedItems;
+    if (existingCartItem) {
+      // update amount
+      const updatedItem = {
+        ...existingCartItem,
+        amount: existingCartItem.amount + action.item.amount,
+      };
+
+      // Override the existing item positioned in existingCartItemIndex
+      updatedItems = [...state.items];
+      updatedItems[existingCartItemIndex] = updatedItem;
+    } else {
+      updatedItems = state.items.concat(action.item); // return a new array unlike push method
+    } 
+    
     return {
       items: updatedItems,
       totalAmount: updatedTotalAmount,
